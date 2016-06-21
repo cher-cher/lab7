@@ -3,7 +3,35 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FindMax", "FindMax\FindMax.vcxproj", "{DE8B9CCE-B29A-4048-B424-CEEF0458E10C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FindMaxTest", "FindMaxTest\FindMaxTest.vcxproj", "{AE077E0E-C0C9-492D-B61C-7485C66077A4}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE8B9CCE-B29A-4048-B424-CEEF0458E10C}.Debug|x64.ActiveCfg = Debug|x64
+		{DE8B9CCE-B29A-4048-B424-CEEF0458E10C}.Debug|x64.Build.0 = Debug|x64
+		{DE8B9CCE-B29A-4048-B424-CEEF0458E10C}.Debug|x86.ActiveCfg = Debug|Win32
+		{DE8B9CCE-B29A-4048-B424-CEEF0458E10C}.Debug|x86.Build.0 = Debug|Win32
+		{DE8B9CCE-B29A-4048-B424-CEEF0458E10C}.Release|x64.ActiveCfg = Release|x64
+		{DE8B9CCE-B29A-4048-B424-CEEF0458E10C}.Release|x64.Build.0 = Release|x64
+		{DE8B9CCE-B29A-4048-B424-CEEF0458E10C}.Release|x86.ActiveCfg = Release|Win32
+		{DE8B9CCE-B29A-4048-B424-CEEF0458E10C}.Release|x86.Build.0 = Release|Win32
+		{AE077E0E-C0C9-492D-B61C-7485C66077A4}.Debug|x64.ActiveCfg = Debug|x64
+		{AE077E0E-C0C9-492D-B61C-7485C66077A4}.Debug|x64.Build.0 = Debug|x64
+		{AE077E0E-C0C9-492D-B61C-7485C66077A4}.Debug|x86.ActiveCfg = Debug|Win32
+		{AE077E0E-C0C9-492D-B61C-7485C66077A4}.Debug|x86.Build.0 = Debug|Win32
+		{AE077E0E-C0C9-492D-B61C-7485C66077A4}.Release|x64.ActiveCfg = Release|x64
+		{AE077E0E-C0C9-492D-B61C-7485C66077A4}.Release|x64.Build.0 = Release|x64
+		{AE077E0E-C0C9-492D-B61C-7485C66077A4}.Release|x86.ActiveCfg = Release|Win32
+		{AE077E0E-C0C9-492D-B61C-7485C66077A4}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
