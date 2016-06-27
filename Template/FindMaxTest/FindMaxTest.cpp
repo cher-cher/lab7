@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "../FindMax/FindMax.h"
+#include <stdexcept>
 
 using namespace std;
 
@@ -47,5 +48,14 @@ BOOST_AUTO_TEST_SUITE(findmax)
 		BOOST_CHECK_EQUAL("mamama", maxValue);
 	}
 
-BOOST_AUTO_TEST_SUITE_END()
+	/*BOOST_AUTO_TEST_CASE(commit_or_rollback_supported)
+	{
+		std::string b(900'000'000, 'l');
+		vector<string> a = { "pap", "lol", "maaaam", b };
+		string maxValue;
+		BOOST_CHECK(FindMax(a, maxValue));
+		BOOST_CHECK_THROW(FindMax(a, maxValue), std::bad_alloc);
+		BOOST_CHECK_EQUAL("maaaam", maxValue);
+	}*/
 
+BOOST_AUTO_TEST_SUITE_END()

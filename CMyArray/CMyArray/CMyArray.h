@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "CMyIterator.h"
 #include <new>
 #include <algorithm>
 
@@ -28,19 +29,96 @@ public:
 		}
 	}
 
+	CMyArray(CMyArray&& arr)
+		:m_begin(arr.m_begin)
+		,m_end(arr.m_end)
+	{
+		arr.m_begin = nullptr;
+		arr.m_end = nullptr;
+	}
+
+	CMyArray<T> & operator=(CMyArray<T> && arr)
+	{
+		if (&arr != this)
+		{
+			Clear();
+			m_begin = arr.m_begin;
+			m_end = arr.m_end;
+			arr.m_begin = nullptr;
+			arr.m_end = nullptr;
+		}
+		return *this;
+	}
+
+	CMyArray<T> & operator=(const CMyArray<T> & arr)
+	{
+		const auto size = arr.GetSize();
+		if (size != 0)
+		{
+			m_begin = RawAlloc(size);
+			try
+			{
+				CopyItems(arr.m_begin, arr.m_end, m_begin, m_end);
+				m_endOfCapacity = m_end;
+			}
+			catch (...)
+			{
+				DeleteItems(m_begin, m_end);
+				throw;
+			}
+		}
+		return *this;
+	}
+	
 	T & operator[](size_t index)
 	{
 		if (index < 0 || index >= (m_end - m_begin))
 		{
-			throw std::out_of_range("index_out_of_range");
+			throw std::out_of_range("index out of range");
 		}
-		return m_array[index];
+		return *(m_begin + index);
 	}
 
 	void Clear()
 	{
 		DeleteItems(m_begin, m_end);
-		m_array.reset();
+		m_begin = nullptr;
+		m_end = nullptr;
+	}
+
+	void Resize(size_t size, T const& value = T())
+	{
+		size_t newCapacity = std::max(1u, size * 2);
+
+		auto newBegin = RawAlloc(newCapacity);
+		T *newEnd = newBegin;
+		try
+		{
+			if (size > GetSize())
+			{
+				CopyItems(m_begin, m_end, newBegin, newEnd);
+				for (size_t i = 0; i < size - GetSize(); i++)
+				{
+					new (newEnd)T(value);
+					++newEnd;
+				}
+			}
+			else
+			{
+				CopyItems(m_begin, m_begin + size, newBegin, newEnd);
+			}
+		}
+		catch (...)
+		{
+			DeleteItems(newBegin, newEnd);
+			throw;
+		}
+		DeleteItems(m_begin, m_end);
+
+		// Переключаемся на использование нового хранилища элементов
+		m_begin = newBegin;
+		m_end = newEnd;
+		m_endOfCapacity = m_begin + newCapacity;
 	}
 
 	void Append(const T & value)
@@ -75,6 +153,30 @@ public:
 			new (m_end) T(value);
 			++m_end;
 		}
+	}
+
+	CMyIterator<T> Begin()
+	{
+		CMyIterator<T> it(m_begin, false);
+		return it;
+	}
+
+	CMyIterator<T> RBegin()
+	{
+		CMyIterator<T> it(m_end, true);
+		return it;
+	}
+
+	CMyIterator<T> End()
+	{
+		CMyIterator<T> it(m_end, true);
+		return it;
+	}
+	
+	CMyIterator<T> REnd()
+	{
+		CMyIterator<T> it(m_begin, false);
+		return it;
 	}
 
 	T & GetBack()
@@ -151,9 +253,7 @@ private:
 	}
 
 private:
-	size_t m_size = 0;
 	T *m_begin = nullptr;
 	T *m_end = nullptr;
 	T *m_endOfCapacity = nullptr;
-	std::unique_ptr<T[]> m_array;
 };

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <stdexcept>
+#include <iostream>
 
 #include <boost/algorithm/string/replace.hpp>
 
