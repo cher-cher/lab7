@@ -163,13 +163,13 @@ public:
 
 	CMyIterator<T> RBegin()
 	{
-		CMyIterator<T> it(m_end, true);
+		CMyIterator<T> it(m_end - 1, true);
 		return it;
 	}
 
 	CMyIterator<T> End()
 	{
-		CMyIterator<T> it(m_end, true);
+		CMyIterator<T> it(m_end - 1, true);
 		return it;
 	}
 	

@@ -42,20 +42,6 @@ public:
 		return *this;
 	}
 
-	/*CMyIterator<T> &CMyIterator<T>::operator++(int)
-	{
-		std::shared_ptr<CMyIterator> t(*this);
-		++(*this);
-		return *t;
-	}
-
-	CMyIterator<T>& CMyIterator<T>::operator--(int)
-	{
-		std::shared_ptr<CMyIterator> t(*this);
-		--(*this);
-		return *t;
-	}*/
-
 private:
 	T * m_current;
 	bool m_isReverse;

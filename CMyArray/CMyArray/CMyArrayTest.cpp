@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(rbegin)
 	}
 	CMyIterator<int> it = arr.RBegin();
 	--it;
-	BOOST_CHECK_EQUAL(*it, 5);
+	BOOST_CHECK_EQUAL(*it, 4);
 }
 
 BOOST_AUTO_TEST_CASE(end)
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(end)
 	}
 	CMyIterator<int> it = arr.End();
 	--it;
-	BOOST_CHECK_EQUAL(*it, 5);
+	BOOST_CHECK_EQUAL(*it, 4);
 }
 
 BOOST_AUTO_TEST_CASE(rend)
