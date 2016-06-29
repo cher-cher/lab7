@@ -3,11 +3,10 @@
 
 #include "stdafx.h"
 #include "CMyArray.h"
-
+#include <stdexcept>
+#include <iostream>
 using namespace std;
 
-#include "stdafx.h"
-#include <stdexcept>
 
 struct MyStruct
 {
@@ -66,26 +65,26 @@ BOOST_AUTO_TEST_CASE(clear_array)
 
 BOOST_AUTO_TEST_CASE(resize_array)
 {
-	arr.Resize(4, 0);
+	arr.Resize(4);
 	BOOST_CHECK_EQUAL(arr.GetSize(), 4);
-	BOOST_CHECK_EQUAL(arr.GetCapacity(), 8);
 	for (auto i = 0; i < 6; ++i)
 	{
 		arr.Append(i);
 	}
-	BOOST_CHECK_EQUAL(arr.GetCapacity(), 16);
-	arr.Resize(7, 0);
+	arr.Resize(7);
 	BOOST_CHECK_EQUAL(arr.GetSize(), 7);
-	BOOST_CHECK_EQUAL(arr.GetCapacity(), 14);
-	arr.Resize(5, 0);
+	arr.Resize(5);
 	BOOST_CHECK_EQUAL(arr.GetSize(), 5);
-	BOOST_CHECK_EQUAL(arr.GetCapacity(), 10);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_CASE(assignment_operator)
 {
 	bool result = true; 
+	CMyArray<int> arr;
 	CMyArray<int> arr1;
+	CMyArray<int> arr2;
 	for (auto i = 0; i < 6; ++i)
 	{
 		arr.Append(i);
@@ -99,6 +98,8 @@ BOOST_AUTO_TEST_CASE(assignment_operator)
 		}
 	}
 	BOOST_CHECK_EQUAL(result, true);
+	arr1 = arr2;
+	BOOST_CHECK_EQUAL(arr1.GetSize(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(moves_constructor)
@@ -127,51 +128,96 @@ BOOST_AUTO_TEST_CASE(moves_assignment_operator)
 	BOOST_CHECK_EQUAL(arr4.GetSize(), size);
 }
 
-BOOST_AUTO_TEST_CASE(begin)
+BOOST_AUTO_TEST_CASE(begin_and_iterator)
 {
 	CMyArray<int> arr;
 	for (auto i = 0; i < 6; ++i)
 	{
 		arr.Append(i);
 	}
-	CMyIterator<int> it = arr.Begin();
-	++it;
-	BOOST_CHECK_EQUAL(*it, 1);
+	auto it = arr.begin();
+
+	it++;
+	BOOST_CHECK_EQUAL(*arr.begin(), 0);
+	BOOST_CHECK_EQUAL(*arr.end(), 5);
 }
 
-BOOST_AUTO_TEST_CASE(rbegin)
+BOOST_AUTO_TEST_CASE(rbegin_iterator)
 {
 	CMyArray<int> arr;
 	for (auto i = 0; i < 6; ++i)
 	{
 		arr.Append(i);
 	}
-	CMyIterator<int> it = arr.RBegin();
-	--it;
-	BOOST_CHECK_EQUAL(*it, 4);
+	CMyIterator<int, true> it = arr.rbegin();
+	//++it;
+	BOOST_CHECK_EQUAL(*it, 5);
 }
 
-BOOST_AUTO_TEST_CASE(end)
+BOOST_AUTO_TEST_CASE(iterator_operator_brackets)
 {
 	CMyArray<int> arr;
 	for (auto i = 0; i < 6; ++i)
 	{
 		arr.Append(i);
 	}
-	CMyIterator<int> it = arr.End();
-	--it;
-	BOOST_CHECK_EQUAL(*it, 4);
+	int ind = 0;
+	bool result = true;
+	CMyIterator<int, false> it = arr.begin();
+	for (size_t i = 0; i < arr.GetSize(); i++, ind++)
+	{
+		if (it[i] != ind)
+		{
+			result = false;
+		}
+	}
+	BOOST_CHECK(result);
 }
 
-BOOST_AUTO_TEST_CASE(rend)
+BOOST_AUTO_TEST_CASE(operator_not_equal)
 {
-	CMyArray<int> arr;
+	CMyArray<int> arr5;
+	bool result1 = true;
 	for (auto i = 0; i < 6; ++i)
 	{
-		arr.Append(i);
+		arr5.Append(i);
 	}
-	CMyIterator<int> it = arr.REnd();
-	++it;
-	BOOST_CHECK_EQUAL(*it, 1);
+	CMyIterator<int, false> it2 = arr5.begin();
+	if (it2[1] != it2[2])
+	{
+		result1 = true;
+	}
+	BOOST_CHECK(result1);
 }
-BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_CASE(operator_less)
+{
+	CMyArray<int> arr6;
+	bool result2 = true;
+	for (auto i = 0; i < 6; ++i)
+	{
+		arr6.Append(i);
+	}
+	CMyIterator<int, false> it1 = arr6.begin();
+	if (it1[1] < it1[2])
+	{
+		result2 = true;
+	}
+	BOOST_CHECK(result2);
+}
+
+BOOST_AUTO_TEST_CASE(minus_plus)
+{
+	CMyArray<int> arr;
+	arr.Append(1);
+	arr.Append(2);
+	arr.Append(3);
+
+	auto ptr = arr.begin();
+	ptr += 1;
+	BOOST_CHECK_EQUAL(*ptr, 2);
+	ptr += 1;
+	BOOST_CHECK_EQUAL(*ptr, 3);
+	ptr -= 1;
+	BOOST_CHECK_EQUAL(*ptr, 2);
+}

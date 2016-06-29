@@ -32,9 +32,11 @@ public:
 	CMyArray(CMyArray&& arr)
 		:m_begin(arr.m_begin)
 		,m_end(arr.m_end)
+		,m_endOfCapacity(arr.m_endOfCapacity)
 	{
 		arr.m_begin = nullptr;
 		arr.m_end = nullptr;
+		arr.m_endOfCapacity = nullptr;
 	}
 
 	CMyArray<T> & operator=(CMyArray<T> && arr)
@@ -44,27 +46,36 @@ public:
 			Clear();
 			m_begin = arr.m_begin;
 			m_end = arr.m_end;
+			m_endOfCapacity = arr.m_endOfCapacity;
 			arr.m_begin = nullptr;
 			arr.m_end = nullptr;
+			arr.m_endOfCapacity = nullptr;
 		}
 		return *this;
 	}
 
 	CMyArray<T> & operator=(const CMyArray<T> & arr)
 	{
-		const auto size = arr.GetSize();
-		if (size != 0)
+		if (&arr != this)
 		{
-			m_begin = RawAlloc(size);
-			try
+			Clear();
+			const auto size = arr.GetSize();
+			if (size != 0)
 			{
-				CopyItems(arr.m_begin, arr.m_end, m_begin, m_end);
-				m_endOfCapacity = m_end;
-			}
-			catch (...)
-			{
-				DeleteItems(m_begin, m_end);
-				throw;
+				CMyArray<T> arr2 = *this;
+				m_begin = RawAlloc(size);
+				try
+				{
+					CopyItems(arr.m_begin, arr.m_end, m_begin, m_end);
+					m_endOfCapacity = m_end;
+				}
+				catch (...)
+				{
+					DeleteItems(m_begin, m_end); 
+					m_endOfCapacity = m_begin;
+					CopyItems(arr2.m_begin, arr2.m_end, m_begin, m_end);
+					throw;
+				}
 			}
 		}
 		return *this;
@@ -72,7 +83,16 @@ public:
 	
 	T & operator[](size_t index)
 	{
-		if (index < 0 || index >= (m_end - m_begin))
+		if (index >= (m_end - m_begin))
+		{
+			throw std::out_of_range("index out of range");
+		}
+		return *(m_begin + index);
+	}
+
+	const T & operator[](size_t index)const
+	{
+		if (index >= (m_end - m_begin))
 		{
 			throw std::out_of_range("index out of range");
 		}
@@ -81,44 +101,43 @@ public:
 
 	void Clear()
 	{
-		DeleteItems(m_begin, m_end);
-		m_begin = nullptr;
-		m_end = nullptr;
+		DestroyItems(m_begin, m_end);
+		m_end = m_begin;
+		m_endOfCapacity = m_begin;
 	}
 
-	void Resize(size_t size, T const& value = T())
+	void Resize(size_t size)
 	{
-		size_t newCapacity = std::max(1u, size * 2);
-
-		auto newBegin = RawAlloc(newCapacity);
-		T *newEnd = newBegin;
-		try
+		auto end = m_end;
+		if (GetSize() < size)
 		{
-			if (size > GetSize())
+			if (GetCapacity() > size)
 			{
-				CopyItems(m_begin, m_end, newBegin, newEnd);
-				for (size_t i = 0; i < size - GetSize(); i++)
+				m_end += size - GetSize();
+			}
+			else if (GetCapacity() < size)
+			{
+				ResizeCapcity(size);
+			}
+			try
+			{
+				end = m_end;
+				m_end = m_begin + size;
+				for (; end != m_end; end++)
 				{
-					new (newEnd)T(value);
-					++newEnd;
+					new (end)T();
 				}
 			}
-			else
+			catch (...)
 			{
-				CopyItems(m_begin, m_begin + size, newBegin, newEnd);
+				throw;
 			}
 		}
-		catch (...)
+		else if (GetSize() > size)
 		{
-			DeleteItems(newBegin, newEnd);
-			throw;
+			m_end -= GetSize() - size;
+			DestroyItems(m_end, end);
 		}
-		DeleteItems(m_begin, m_end);
-
-		// Переключаемся на использование нового хранилища элементов
-		m_begin = newBegin;
-		m_end = newEnd;
-		m_endOfCapacity = m_begin + newCapacity;
 	}
 
 	void Append(const T & value)
@@ -155,27 +174,50 @@ public:
 		}
 	}
 
-	CMyIterator<T> Begin()
-	{
-		CMyIterator<T> it(m_begin, false);
+	CMyIterator<T, false> begin()
+	{//нет возможности получть итератор у const arr, переименовать 
+		CMyIterator<T, false> it(m_begin);
 		return it;
 	}
 
-	CMyIterator<T> RBegin()
+	CMyIterator<const T, false> begin() const
 	{
-		CMyIterator<T> it(m_end - 1, true);
+		CMyIterator<const T, false> it(m_begin);
 		return it;
 	}
 
-	CMyIterator<T> End()
-	{
-		CMyIterator<T> it(m_end - 1, true);
+	CMyIterator<T, false> end()
+	{//исправить итератор, не должен совпадать rbegin
+		CMyIterator<T, false> it(m_end - 1);
 		return it;
 	}
 	
-	CMyIterator<T> REnd()
+	CMyIterator<const T, false> end() const
 	{
-		CMyIterator<T> it(m_begin, false);
+		CMyIterator<T, false> it(m_end - 1);
+		return it;
+	}
+	CMyIterator<T, true> rbegin()
+	{
+		CMyIterator<T, true> it(m_end - 1);
+		return it;
+	}
+
+	CMyIterator<const T, true> rbegin()const
+	{
+		CMyIterator<T, true> it(m_end - 1);
+		return it;
+	}
+	
+	CMyIterator<T, true> rend()
+	{//не должен совпадать с begin
+		CMyIterator<T, true> it(m_begin);
+		return it;
+	}
+
+	CMyIterator<const T, true> rend() const
+	{//не должен совпадать с begin
+		CMyIterator<T, true> it(m_begin);
 		return it;
 	}
 
@@ -195,17 +237,40 @@ public:
 	{
 		return m_end - m_begin;
 	}
-
 	size_t GetCapacity()const
 	{
 		return m_endOfCapacity - m_begin;
 	}
+	
 	~CMyArray()
 	{
 		DeleteItems(m_begin, m_end);
 	}
 private:
-
+	
+	void ResizeCapcity(size_t size)
+	{
+		if (GetCapacity() < size)
+		{
+			auto newBegin = RawAlloc(size);
+			T *newEnd = newBegin;
+			try 
+			{
+				CopyItems(m_begin, m_end, newBegin, newEnd);
+				
+				DestroyItems(m_begin, m_end);
+				RawDealloc(m_begin);
+			}
+			catch (...)
+			{
+				throw;
+			}
+			
+			m_begin = newBegin;
+			m_end = newEnd;
+			m_endOfCapacity = m_begin + size;
+		}
+	}
 	static void DeleteItems(T *begin, T *end)
 	{
 		// Разрушаем старые элементы

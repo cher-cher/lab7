@@ -1,22 +1,52 @@
 #pragma once
 #include "stdafx.h"
 
-template <typename T>
+template <typename T , bool isReversed>
 class CMyIterator
 {
 public:
-	CMyIterator(T * current, bool isReverse)
+	CMyIterator(T * current)
 		:m_current(current)
-		,m_isReverse(isReverse)
 	{
 	}
+	
+	T* operator ->()
+	{
+		return m_current;
+	}
 
-	T CMyIterator<T>::operator*() const
+	T operator*() const
 	{
 		return *m_current;
 	}
 
-	CMyIterator<T> &CMyIterator<T>::operator++()
+	CMyIterator & operator+=(const size_t numb)
+	{
+		if (m_isReverse)
+		{
+			m_current += numb * (-1);
+		}
+		else
+		{
+			m_current += numb;
+		}
+		return *this;
+	}
+
+	CMyIterator & operator-=(const size_t numb)
+	{
+		if (m_isReverse)
+		{
+			m_current -= numb * (-1);
+		}
+		else
+		{
+			m_current -= numb;
+		}
+		return *this;
+	}
+
+	CMyIterator & operator++()
 	{
 		if (m_isReverse)
 		{
@@ -29,7 +59,20 @@ public:
 		return *this;
 	}
 
-	CMyIterator<T>& CMyIterator<T>::operator--()
+	CMyIterator operator++(int)
+	{
+		if (m_isReverse)
+		{
+			m_current--;
+		}
+		else
+		{
+			m_current++;
+		}
+		return *this;
+	}
+
+	CMyIterator& operator--()
 	{
 		if (m_isReverse)
 		{
@@ -40,6 +83,59 @@ public:
 			++m_current;
 		}
 		return *this;
+	}
+
+	CMyIterator operator--(int)
+	{
+		if (m_isReverse)
+		{
+			m_current--;
+		}
+		else
+		{
+			m_current++;
+		}
+		return *this;
+	}
+
+	bool operator!=(CMyIterator const& other) const
+	{
+		return it != other.it;
+	}
+
+	bool operator==(CMyIterator const& other) const
+	{
+		return it == other.it;
+	}
+
+	bool operator<(CMyIterator const& other) const
+	{
+		return (*this) < other;
+	}
+
+	bool operator>(CMyIterator const& other) const
+	{
+		return (*this) > other;
+	}
+
+	bool operator<=(CMyIterator const& other) const
+	{
+		return (*this) <= other;
+	}
+
+	bool operator>=(CMyIterator const& other) const
+	{
+		return (*this) >= other;
+	}
+
+	T & operator[](size_t index)
+	{
+		return m_current[index];
+	}
+
+	const T & operator[](const size_t index)const
+	{
+		return m_current[index];
 	}
 
 private:
